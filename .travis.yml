@@ -1,11 +1,20 @@
 language: python
+
 python:
     - "3.7"
+
 install: pip install -r requirements/development.txt
+
 script:
-    - flake8 statprly
+    - radon cc statprly -nb --total-average
+    - cat requirements/development.txt | safety check --stdin
+    - isort -rc statprly tests --diff
+    - flake8 statprly && flake8 tests
     - pylint statprly
     - mypy statprly
-    - coverage erase
-    - coverage run --include=statprly/* -m pytest -ra
-    - coveralls
+    - coverage run -m pytest -vv tests
+
+after_success:
+  - coverage report -m && coverage xml
+  - bash <(curl -s https://codecov.io/bash)
+
