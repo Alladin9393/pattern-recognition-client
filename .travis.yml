@@ -7,14 +7,11 @@ install: pip install -r requirements/development.txt
 
 script:
     - radon cc statprly -nb --total-average
-    - cat requirements/development.txt | safety check --stdin
+    - cat requirements/production.txt | safety check --stdin
     - isort -rc statprly tests --diff
-    - flake8 statprly && flake8 tests
     - pylint statprly
     - mypy statprly
-    - coverage run -m pytest -vv tests
 
 after_success:
   - coverage report -m && coverage xml
   - bash <(curl -s https://codecov.io/bash)
-
