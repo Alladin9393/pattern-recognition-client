@@ -7,9 +7,9 @@ deps:  ## Install dependencies
 	pip install -r requirements/development.txt
 
 lint:  ## Lint and static-check
-	flake8 dadata
-	pylint dadata
-	mypy dadata
+	flake8 statprly
+	pylint statprly
+	mypy statprly
 
 push:  ## Push code with tags
 	git push && git push --tags

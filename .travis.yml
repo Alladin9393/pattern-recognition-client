@@ -8,9 +8,8 @@ install: pip install -r requirements/development.txt
 script:
     - radon cc statprly -nb --total-average
     - cat requirements/production.txt | safety check --stdin
-    - isort -rc statprly tests --diff
-    - pylint statprly
-    - mypy statprly
+    - flake8 statprly && flake8 tests
+    - isort statprly tests --diff
 
 after_success:
   - coverage report -m && coverage xml
