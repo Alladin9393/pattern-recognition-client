@@ -5,8 +5,8 @@ import json
 
 import numpy
 
-from statprly.errors import ValidationDataError
 from statprly.constants import SUPPORTED_DIMENSION_OF_STANDARDS
+from statprly.errors import ValidationDataError
 
 
 class DataReader:

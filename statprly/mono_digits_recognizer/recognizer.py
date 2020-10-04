@@ -3,11 +3,12 @@ Provide implementation of the recognition of the monochrome digits.
 """
 from numpy import array
 
-from statprly.mono_digits_recognizer.interfaces import BaseRecognizer
+from statprly.constants import (
+    DIGIT_STANDARDS_PATH,
+    MOST_LIKELY_OUTCOME,
+)
 from statprly.mono_digits_recognizer.data_reader import DataReader
-from statprly.constants import MOST_LIKELY_OUTCOME
-
-from statprly.constants import DIGIT_STANDARDS_PATH
+from statprly.mono_digits_recognizer.interfaces import BaseRecognizer
 
 
 class MonoDigitRecognizer(BaseRecognizer):
