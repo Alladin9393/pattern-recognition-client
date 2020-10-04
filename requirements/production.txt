@@ -1,1 +1,2 @@
-websocket_client==0.53.0
+autobahn==20.7.1
+numpy==1.19.2
