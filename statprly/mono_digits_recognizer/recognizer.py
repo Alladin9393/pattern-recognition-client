@@ -1,14 +1,19 @@
 """
 Provide implementation of the recognition of the monochrome digits.
 """
-from numpy import array
+import math
+
+import numpy as np
 
 from statprly.constants import (
     DIGIT_STANDARDS_PATH,
-    MOST_LIKELY_OUTCOME,
+    MOST_LIKELY,
+    LEAST_LIKELY,
+    WHITE_PIXEL,
 )
 from statprly.mono_digits_recognizer.data_reader import DataReader
 from statprly.mono_digits_recognizer.interfaces import BaseRecognizer
+from statprly.errors import ValidationDataError
 
 
 class MonoDigitRecognizer(BaseRecognizer):
@@ -27,24 +32,33 @@ class MonoDigitRecognizer(BaseRecognizer):
         )
         self._digit_standards = self._data_provider.get_digit_standards_dict()
 
-    def recognize(self, digit_to_predict: array, noise_probability: float) -> int:
+    def recognize(
+        self,
+        digit_to_predict_data: np.array,
+        noise_probability: float,
+    ) -> int:
         """
         Predict number from `digit_to_predict` matrix.
 
-        :param digit_to_predict: displaying an image of a digit to numpy array `1` and `0`.
+        :param digit_to_predict_data: displaying an image of a digit to numpy array `1` and `0`.
         :param noise_probability: the probability of the noise in digit_to_predict data array.
         :return: predicted number.
         """
+        self.__validate_recognize_data(
+            digit_to_predict_data=digit_to_predict_data,
+            noise_probability=noise_probability,
+        )
         possible_exodus = range(0, 10)
         digits_probabilities = {}
+
         for exodus in possible_exodus:
             digit_probability = self.get_digit_probability(
-                array,
-                exodus,
-                noise_probability,
+                digit_data=digit_to_predict_data,
+                digit_to_compare=exodus,
+                noise_probability=noise_probability,
             )
 
-            if digit_probability == MOST_LIKELY_OUTCOME:
+            if digit_probability == MOST_LIKELY:
                 return exodus
 
             digits_probabilities[exodus] = digit_probability
@@ -54,7 +68,7 @@ class MonoDigitRecognizer(BaseRecognizer):
 
     def get_digit_probability(
         self,
-        digit_data: array,
+        digit_data: np.array,
         digit_to_compare: int,
         noise_probability: float,
     ) -> float:
@@ -66,7 +80,89 @@ class MonoDigitRecognizer(BaseRecognizer):
         :param noise_probability: the probability of the noise in digit_to_predict data array.
         :return: probability.
         """
-        return MOST_LIKELY_OUTCOME
+        probability = 0
+        digit_to_compare_data = self.__get_digit_to_compare_data(digit_to_compare)
+
+        if digit_data.shape != digit_to_compare_data.shape:
+            ValidationDataError("Invalid `digit_to_predict_data` shape.")
+
+        if noise_probability == MOST_LIKELY:
+            digit_data = self.__inverse_digit_pixels(digit_data)
+
+        if noise_probability == LEAST_LIKELY or noise_probability == MOST_LIKELY:
+            is_same_image = digit_to_compare_data == digit_data
+            probability = float(is_same_image.all())
+
+            return probability
+
+        for pixels_frame in range(0, len(digit_to_compare_data)):
+
+            is_different_pixels_frame = (
+                digit_to_compare_data[pixels_frame] != digit_data[pixels_frame]
+            )
+            is_different_pixels_frame = is_different_pixels_frame.all()
+
+            logarithmic_noise = math.log(noise_probability)
+            inverse_logarithmic_noise = math.log(MOST_LIKELY - noise_probability)
+
+            is_white_frame = WHITE_PIXEL != is_different_pixels_frame
+            is_white_frame = is_white_frame.all()
+
+            most_likely_outcome_probability = (
+                is_different_pixels_frame * logarithmic_noise
+            )
+            least_likely_outcome_probability = (
+                is_white_frame * inverse_logarithmic_noise
+            )
+
+            probability += (
+                most_likely_outcome_probability + least_likely_outcome_probability
+            )
+
+        return probability
+
+    def __get_digit_to_compare_data(self, digit_to_compare: int) -> np.array:
+        """
+        Get digit_to_compare numpy array data.
+
+        :param digit_to_compare: the digit to be data retrieved.
+        :return: digit data.
+        """
+        digit_to_compare_key = str(digit_to_compare)
+        digit_to_compare_data = self._digit_standards.get(digit_to_compare_key)
+
+        return np.array(digit_to_compare_data)
+
+    @staticmethod
+    def __validate_recognize_data(
+        digit_to_predict_data: np.array,
+        noise_probability: float,
+    ):
+        """
+        Validate recognize data.
+
+        :param digit_to_predict_data: displaying an image of a digit to numpy array `1` and `0`.
+        :param noise_probability: the probability of the noise in digit_to_predict data array.
+        """
+        if not isinstance(digit_to_predict_data, np.ndarray):
+            raise ValidationDataError(
+                "`digit_to_predict_data` must be a numpy array data.",
+            )
+
+        if 0 < noise_probability > 1:
+            raise ValidationDataError(
+                "`noise_probability` must be a between `0` and `1`.",
+            )
+
+    @staticmethod
+    def __inverse_digit_pixels(digit_data):
+        """
+        Invert digit pixels, pixel^1.
+
+        :param digit_data: digit_data to pixels inverse.
+        :return: inverted digit_data.
+        """
+        return digit_data ^ 1
 
     @property
     def digit_standards_path(self) -> str:
