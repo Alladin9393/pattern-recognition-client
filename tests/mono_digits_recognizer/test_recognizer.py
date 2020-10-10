@@ -5,15 +5,15 @@ import json
 import random
 from os.path import dirname
 
-import pytest
 import numpy
+import pytest
 
 from statprly import MonoDigitRecognizer
-from statprly.errors import ValidationDataError
 from statprly.constants import (
-    MOST_LIKELY,
     LEAST_LIKELY,
+    MOST_LIKELY,
 )
+from statprly.errors import ValidationDataError
 
 DIRNAME = dirname(__file__)
 

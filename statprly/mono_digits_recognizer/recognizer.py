@@ -7,13 +7,13 @@ import numpy as np
 
 from statprly.constants import (
     DIGIT_STANDARDS_PATH,
-    MOST_LIKELY,
     LEAST_LIKELY,
+    MOST_LIKELY,
     WHITE_PIXEL,
 )
+from statprly.errors import ValidationDataError
 from statprly.mono_digits_recognizer.data_reader import DataReader
 from statprly.mono_digits_recognizer.interfaces import BaseRecognizer
-from statprly.errors import ValidationDataError
 
 
 class MonoDigitRecognizer(BaseRecognizer):
@@ -110,9 +110,7 @@ class MonoDigitRecognizer(BaseRecognizer):
 
             is_white_pixel = WHITE_PIXEL != is_different_pixels
 
-            most_likely_outcome_probability = (
-                is_different_pixels * logarithmic_noise
-            )
+            most_likely_outcome_probability = is_different_pixels * logarithmic_noise
             least_likely_outcome_probability = (
                 is_white_pixel * inverse_logarithmic_noise
             )
