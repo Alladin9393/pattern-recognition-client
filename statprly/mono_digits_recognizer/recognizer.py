@@ -80,6 +80,10 @@ class MonoDigitRecognizer(BaseRecognizer):
         :param noise_probability: the probability of the noise in digit_to_predict data array.
         :return: probability.
         """
+        self.__validate_recognize_data(
+            digit_to_predict_data=digit_data,
+            noise_probability=noise_probability,
+        )
         probability = 0
         digit_to_compare_data = self.__get_digit_to_compare_data(digit_to_compare)
 
@@ -95,24 +99,22 @@ class MonoDigitRecognizer(BaseRecognizer):
 
             return probability
 
-        for pixels_frame in range(0, len(digit_to_compare_data)):
+        # Iterate through two arrays:
+        # https://numpy.org/doc/stable/reference/arrays.nditer.html#broadcasting-array-iteration
+        for pixel, pixel_to_compare in np.nditer([digit_data, digit_to_compare_data]):
 
-            is_different_pixels_frame = (
-                digit_to_compare_data[pixels_frame] != digit_data[pixels_frame]
-            )
-            is_different_pixels_frame = is_different_pixels_frame.all()
+            is_different_pixels = pixel != pixel_to_compare
 
             logarithmic_noise = math.log(noise_probability)
             inverse_logarithmic_noise = math.log(MOST_LIKELY - noise_probability)
 
-            is_white_frame = WHITE_PIXEL != is_different_pixels_frame
-            is_white_frame = is_white_frame.all()
+            is_white_pixel = WHITE_PIXEL != is_different_pixels
 
             most_likely_outcome_probability = (
-                is_different_pixels_frame * logarithmic_noise
+                is_different_pixels * logarithmic_noise
             )
             least_likely_outcome_probability = (
-                is_white_frame * inverse_logarithmic_noise
+                is_white_pixel * inverse_logarithmic_noise
             )
 
             probability += (
