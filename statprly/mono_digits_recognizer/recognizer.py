@@ -13,6 +13,7 @@ from statprly.constants import (
 )
 from statprly.errors import ValidationDataError
 from statprly.mono_digits_recognizer.data_reader import DataReader
+from statprly.mono_digits_recognizer.standards_provider import StandardsProvider
 from statprly.mono_digits_recognizer.interfaces import BaseRecognizer
 
 
@@ -25,12 +26,18 @@ class MonoDigitRecognizer(BaseRecognizer):
         self,
         data_provider=DataReader,
         digit_standards_path=DIGIT_STANDARDS_PATH,
+        standard_provider=StandardsProvider,
     ):
         self._digit_standards_path = digit_standards_path
         self._data_provider = data_provider(
             digit_standards_path=self._digit_standards_path,
         )
-        self._digit_standards = self._data_provider.get_digit_standards_dict()
+        digit_standards_without_scale = self._data_provider.get_digit_standards_dict()
+        self._standard_provider = standard_provider(
+            digit_standards=digit_standards_without_scale,
+        )
+        # Key scale - value digit standards with scale
+        self._digit_standards = {0: digit_standards_without_scale}
 
     def recognize(
         self,
@@ -85,7 +92,10 @@ class MonoDigitRecognizer(BaseRecognizer):
             noise_probability=noise_probability,
         )
         probability = 0
-        digit_to_compare_data = self.__get_digit_to_compare_data(digit_to_compare)
+        digit_to_compare_data = self.__get_digit_to_compare_data(
+            digit_to_compare=digit_to_compare,
+            scale=len(digit_data),
+        )
 
         if digit_data.shape != digit_to_compare_data.shape:
             ValidationDataError("Invalid `digit_to_predict_data` shape.")
@@ -121,15 +131,25 @@ class MonoDigitRecognizer(BaseRecognizer):
 
         return probability
 
-    def __get_digit_to_compare_data(self, digit_to_compare: int) -> np.array:
+    def __get_digit_to_compare_data(
+        self,
+        digit_to_compare: int,
+        scale: int,
+    ) -> np.array:
         """
         Get digit_to_compare numpy array data.
 
         :param digit_to_compare: the digit to be data retrieved.
         :return: digit data.
         """
+        if scale not in self._digit_standards:
+            self._digit_standards[scale] = self._standard_provider.get_scaled_standard(
+                vertical_scale=scale,
+                horizontal_scale=scale,
+            )
+
         digit_to_compare_key = str(digit_to_compare)
-        digit_to_compare_data = self._digit_standards.get(digit_to_compare_key)
+        digit_to_compare_data = self._digit_standards[scale].get(digit_to_compare_key)
 
         return np.array(digit_to_compare_data)
 
@@ -213,3 +233,7 @@ class MonoDigitRecognizer(BaseRecognizer):
             f"{self._digit_standards_path!r}"
             f")"
         )
+
+
+if __name__ == '__main__':
+    m = MonoDigitRecognizer()

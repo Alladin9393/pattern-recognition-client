@@ -1,12 +1,11 @@
 """
 Provide implementation of the digit standards provider.
 """
-import math
-
 import numpy as np
 
-from statprly.errors import ValidationDataError
-from statprly.mono_digits_recognizer.standards_provider.interfaces import BaseStandardsProvider
+from statprly.mono_digits_recognizer.standards_provider.interfaces import (
+    BaseStandardsProvider,
+)
 
 
 class StandardsProvider(BaseStandardsProvider):
@@ -18,9 +17,9 @@ class StandardsProvider(BaseStandardsProvider):
         self._digit_standards = digit_standards
 
     def get_scaled_standard(
-            self,
-            vertical_scale: int,
-            horizontal_scale: int,
+        self,
+        vertical_scale: int,
+        horizontal_scale: int,
     ) -> np.array:
         """
         Get scaled digit standard.
@@ -37,10 +36,10 @@ class StandardsProvider(BaseStandardsProvider):
         return scaled_standards
 
     def get_scaled_standard_with_noise(
-            self,
-            vertical_scale: int,
-            horizontal_scale: int,
-            noise_probability: float
+        self,
+        vertical_scale: int,
+        horizontal_scale: int,
+        noise_probability: float,
     ) -> np.array:
         """
         Get scaled digit standard with `Bernoulli` noise.
@@ -75,8 +74,4 @@ class StandardsProvider(BaseStandardsProvider):
         """
         Printable representation of the StandardsProvider.
         """
-        return (
-            f"{self.__class__.__name__}("
-            f"{self._digit_standards!r}"
-            f")"
-        )
+        return f"{self.__class__.__name__}(" f"{self._digit_standards!r}" f")"

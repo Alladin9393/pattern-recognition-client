@@ -16,10 +16,10 @@ class BaseStandardsProvider(ABC):
 
     @abstractmethod
     def get_scaled_standard_with_noise(
-            self,
-            vertical_scale: int,
-            horizontal_scale: int,
-            noise_probability: float
+        self,
+        vertical_scale: int,
+        horizontal_scale: int,
+        noise_probability: float,
     ) -> array:
         """
         Get scaled digit standard with `Bernoulli` noise.
@@ -32,9 +32,9 @@ class BaseStandardsProvider(ABC):
 
     @abstractmethod
     def get_scaled_standard(
-            self,
-            vertical_scale: int,
-            horizontal_scale: int,
+        self,
+        vertical_scale: int,
+        horizontal_scale: int,
     ) -> array:
         """
         Get scaled digit standard.
