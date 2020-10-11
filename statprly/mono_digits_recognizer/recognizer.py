@@ -14,6 +14,7 @@ from statprly.constants import (
 from statprly.errors import ValidationDataError
 from statprly.mono_digits_recognizer.data_reader import DataReader
 from statprly.mono_digits_recognizer.interfaces import BaseRecognizer
+from statprly.mono_digits_recognizer.standards_provider import StandardsProvider
 
 
 class MonoDigitRecognizer(BaseRecognizer):
@@ -25,12 +26,19 @@ class MonoDigitRecognizer(BaseRecognizer):
         self,
         data_provider=DataReader,
         digit_standards_path=DIGIT_STANDARDS_PATH,
+        standard_provider=StandardsProvider,
     ):
         self._digit_standards_path = digit_standards_path
         self._data_provider = data_provider(
             digit_standards_path=self._digit_standards_path,
         )
-        self._digit_standards = self._data_provider.get_digit_standards_dict()
+
+        digit_standards_without_scale = self._data_provider.get_digit_standards_dict()
+
+        self._standards_default_scale = len(digit_standards_without_scale.get("0"))
+        self._standard_provider = standard_provider()
+        # Key scale - value digit standards with scale
+        self._digit_standards_cache = {0: digit_standards_without_scale}
 
     def recognize(
         self,
@@ -85,7 +93,14 @@ class MonoDigitRecognizer(BaseRecognizer):
             noise_probability=noise_probability,
         )
         probability = 0
-        digit_to_compare_data = self.__get_digit_to_compare_data(digit_to_compare)
+
+        scale = len(digit_data) / self._standards_default_scale
+        scale = int(scale)
+
+        digit_to_compare_data = self.__get_digit_to_compare_data(
+            digit_to_compare=digit_to_compare,
+            scale=scale,
+        )
 
         if digit_data.shape != digit_to_compare_data.shape:
             ValidationDataError("Invalid `digit_to_predict_data` shape.")
@@ -121,7 +136,11 @@ class MonoDigitRecognizer(BaseRecognizer):
 
         return probability
 
-    def __get_digit_to_compare_data(self, digit_to_compare: int) -> np.array:
+    def __get_digit_to_compare_data(
+        self,
+        digit_to_compare: int,
+        scale: int,
+    ) -> np.array:
         """
         Get digit_to_compare numpy array data.
 
@@ -129,9 +148,33 @@ class MonoDigitRecognizer(BaseRecognizer):
         :return: digit data.
         """
         digit_to_compare_key = str(digit_to_compare)
-        digit_to_compare_data = self._digit_standards.get(digit_to_compare_key)
+        if scale not in self._digit_standards_cache:
+            self._digit_standards_cache[scale] = self.__generate_standards_with_scale(
+                scale=scale,
+            )
+
+        digit_to_compare_data = self._digit_standards_cache[scale].get(
+            digit_to_compare_key,
+        )
 
         return np.array(digit_to_compare_data)
+
+    def __generate_standards_with_scale(self, scale: int) -> dict:
+        """
+        Generate dictionary of standards with scale.
+
+        :param scale: the amount by which the digit will be scaled
+        """
+        scaled_standards = {}
+        for i in range(10):
+            digit_key = str(i)
+            scaled_standards[digit_key] = self._standard_provider.get_scaled_standard(
+                digit_data=self._digit_standards_cache[0].get(digit_key),
+                vertical_scale=scale,
+                horizontal_scale=scale,
+            )
+
+        return scaled_standards
 
     @staticmethod
     def __validate_recognize_data(
@@ -181,7 +224,7 @@ class MonoDigitRecognizer(BaseRecognizer):
         :param value: `digit_standards_path` variable value
         """
         self._digit_standards_path = value
-        self._digit_standards = self._data_provider.get_digit_standards_dict()
+        self._digit_standards_cache = self._data_provider.get_digit_standards_dict()
 
     @property
     def data_provider(self):
@@ -200,7 +243,7 @@ class MonoDigitRecognizer(BaseRecognizer):
         :param value: `data_provider` variable value
         """
         self._data_provider = value(self._digit_standards_path)
-        self._digit_standards = self._data_provider.get_digit_standards_dict()
+        self._digit_standards_cache = self._data_provider.get_digit_standards_dict()
 
     def __repr__(self):
         """
@@ -208,7 +251,7 @@ class MonoDigitRecognizer(BaseRecognizer):
         """
         return (
             f"{self.__class__.__name__}("
-            f"{self._digit_standards!r}, "
+            f"{self._digit_standards_cache!r}, "
             f"{self._data_provider!r}, "
             f"{self._digit_standards_path!r}"
             f")"
