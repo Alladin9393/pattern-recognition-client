@@ -5,9 +5,7 @@
 [![Build Status](https://travis-ci.com/Alladin9393/statprly.svg?branch=develop)](https://travis-ci.com/Alladin9393/statprly)
 [![CodeFactor](https://www.codefactor.io/repository/github/alladin9393/statprly/badge)](https://www.codefactor.io/repository/github/alladin9393/statprly)
 
-[![PyPI license](https://img.shields.io/pypi/l/statprly.svg)](https://pypi.python.org/pypi/statprly/)
 [![PyPI pyversions](https://img.shields.io/pypi/pyversions/statprly.svg)](https://pypi.python.org/pypi/statprly/)
-[![Downloads](https://pepy.tech/badge/statprly)](https://pepy.tech/project/statprly)
 
 `STATPRLY` - is a python package with recognition tools.
 
