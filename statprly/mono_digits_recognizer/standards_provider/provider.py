@@ -3,9 +3,7 @@ Provide implementation of the digit standards provider.
 """
 import numpy as np
 
-from statprly.mono_digits_recognizer.standards_provider.interfaces import (
-    BaseStandardsProvider,
-)
+from statprly.mono_digits_recognizer.standards_provider.interfaces import BaseStandardsProvider
 
 
 class StandardsProvider(BaseStandardsProvider):
@@ -51,6 +49,16 @@ class StandardsProvider(BaseStandardsProvider):
         :param noise_probability: the probability of noise to be applied to the digit.
         :return: digit standard.
         """
+        if vertical_scale == 0 and horizontal_scale == 0:
+            for i in range(len(digit_data)):
+                for pixel in range(len(digit_data[i])):
+                    pixel_to_add = self._apply_noise_to_element(
+                        element=digit_data[i][pixel],
+                        noise_probability=noise_probability,
+                    )
+                    digit_data[i][pixel] = pixel_to_add
+            return digit_data
+
         scaled_standards = []
         for i, row in enumerate(digit_data):
 

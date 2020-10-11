@@ -13,8 +13,8 @@ from statprly.constants import (
 )
 from statprly.errors import ValidationDataError
 from statprly.mono_digits_recognizer.data_reader import DataReader
-from statprly.mono_digits_recognizer.standards_provider import StandardsProvider
 from statprly.mono_digits_recognizer.interfaces import BaseRecognizer
+from statprly.mono_digits_recognizer.standards_provider import StandardsProvider
 
 
 class MonoDigitRecognizer(BaseRecognizer):
@@ -35,7 +35,7 @@ class MonoDigitRecognizer(BaseRecognizer):
 
         digit_standards_without_scale = self._data_provider.get_digit_standards_dict()
 
-        self._standards_default_scale = len(digit_standards_without_scale.get('0'))
+        self._standards_default_scale = len(digit_standards_without_scale.get("0"))
         self._standard_provider = standard_provider()
         # Key scale - value digit standards with scale
         self._digit_standards_cache = {0: digit_standards_without_scale}
@@ -149,9 +149,13 @@ class MonoDigitRecognizer(BaseRecognizer):
         """
         digit_to_compare_key = str(digit_to_compare)
         if scale not in self._digit_standards_cache:
-            self._digit_standards_cache[scale] = self.__generate_standards_with_scale(scale=scale)
+            self._digit_standards_cache[scale] = self.__generate_standards_with_scale(
+                scale=scale,
+            )
 
-        digit_to_compare_data = self._digit_standards_cache[scale].get(digit_to_compare_key)
+        digit_to_compare_data = self._digit_standards_cache[scale].get(
+            digit_to_compare_key,
+        )
 
         return np.array(digit_to_compare_data)
 

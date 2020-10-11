@@ -14,8 +14,89 @@ from statprly.constants import (
     MOST_LIKELY,
 )
 from statprly.errors import ValidationDataError
+from statprly.mono_digits_recognizer.standards_provider import StandardsProvider
 
 DIRNAME = dirname(__file__)
+
+ACCURACY = 0.7
+
+
+def test_recognize_random_digit_with_random_noise_less_than_half():
+    """
+    Case: recognize random digit with random noise < 0.44 and scale.
+    Expect: recognized digit is returned.
+    """
+    test_cases = 100
+
+    with open(DIRNAME + "/custom_standardts_data/mock_data_to_recognize.json") as f:
+        digit_data_to_recognize = json.loads(f.read())
+
+    standards_provider = StandardsProvider()
+    recognizer = MonoDigitRecognizer()
+
+    number_of_success = 0
+    for i in range(100):
+        random_noise = numpy.random.uniform(0, 0.44)
+        random_scale = random.randrange(20)
+        expected_digit = random.randrange(10)
+
+        digit_with_noise = standards_provider.get_scaled_standard_with_noise(
+            digit_data=digit_data_to_recognize[str(expected_digit)],
+            vertical_scale=random_scale,
+            horizontal_scale=random_scale,
+            noise_probability=random_noise,
+        )
+        digit_with_noise = numpy.array(digit_with_noise)
+
+        recognized_digit = recognizer.recognize(
+            digit_to_predict_data=digit_with_noise,
+            noise_probability=random_noise,
+        )
+
+        is_success = recognized_digit == expected_digit
+        number_of_success += int(is_success)
+
+    accuracy = number_of_success / test_cases
+    assert accuracy > ACCURACY
+
+
+def test_recognize_random_digit_with_random_noise_more_than_half():
+    """
+    Case: recognize random digit with random noise > 0.6 and scale.
+    Expect: recognized digit is returned.
+    """
+    test_cases = 100
+
+    with open(DIRNAME + "/custom_standardts_data/mock_data_to_recognize.json") as f:
+        digit_data_to_recognize = json.loads(f.read())
+
+    standards_provider = StandardsProvider()
+    recognizer = MonoDigitRecognizer()
+
+    number_of_success = 0
+    for i in range(100):
+        random_noise = numpy.random.uniform(0.6, 1)
+        random_scale = random.randrange(20)
+        expected_digit = random.randrange(10)
+
+        digit_with_noise = standards_provider.get_scaled_standard_with_noise(
+            digit_data=digit_data_to_recognize[str(expected_digit)],
+            vertical_scale=random_scale,
+            horizontal_scale=random_scale,
+            noise_probability=random_noise,
+        )
+        digit_with_noise = numpy.array(digit_with_noise)
+
+        recognized_digit = recognizer.recognize(
+            digit_to_predict_data=digit_with_noise,
+            noise_probability=random_noise,
+        )
+
+        is_success = recognized_digit == expected_digit
+        number_of_success += int(is_success)
+
+    accuracy = number_of_success / test_cases
+    assert accuracy > ACCURACY
 
 
 def test_recognize_random_digit_with_zero_noise():
