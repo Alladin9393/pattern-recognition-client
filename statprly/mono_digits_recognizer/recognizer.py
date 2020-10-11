@@ -32,12 +32,13 @@ class MonoDigitRecognizer(BaseRecognizer):
         self._data_provider = data_provider(
             digit_standards_path=self._digit_standards_path,
         )
+
         digit_standards_without_scale = self._data_provider.get_digit_standards_dict()
-        self._standard_provider = standard_provider(
-            digit_standards=digit_standards_without_scale,
-        )
+
+        self._standards_default_scale = len(digit_standards_without_scale.get('0'))
+        self._standard_provider = standard_provider()
         # Key scale - value digit standards with scale
-        self._digit_standards = {0: digit_standards_without_scale}
+        self._digit_standards_cache = {0: digit_standards_without_scale}
 
     def recognize(
         self,
@@ -92,9 +93,13 @@ class MonoDigitRecognizer(BaseRecognizer):
             noise_probability=noise_probability,
         )
         probability = 0
+
+        scale = len(digit_data) / self._standards_default_scale
+        scale = int(scale)
+
         digit_to_compare_data = self.__get_digit_to_compare_data(
             digit_to_compare=digit_to_compare,
-            scale=len(digit_data),
+            scale=scale,
         )
 
         if digit_data.shape != digit_to_compare_data.shape:
@@ -142,16 +147,30 @@ class MonoDigitRecognizer(BaseRecognizer):
         :param digit_to_compare: the digit to be data retrieved.
         :return: digit data.
         """
-        if scale not in self._digit_standards:
-            self._digit_standards[scale] = self._standard_provider.get_scaled_standard(
+        digit_to_compare_key = str(digit_to_compare)
+        if scale not in self._digit_standards_cache:
+            self._digit_standards_cache[scale] = self.__generate_standards_with_scale(scale=scale)
+
+        digit_to_compare_data = self._digit_standards_cache[scale].get(digit_to_compare_key)
+
+        return np.array(digit_to_compare_data)
+
+    def __generate_standards_with_scale(self, scale: int) -> dict:
+        """
+        Generate dictionary of standards with scale.
+
+        :param scale: the amount by which the digit will be scaled
+        """
+        scaled_standards = {}
+        for i in range(10):
+            digit_key = str(i)
+            scaled_standards[digit_key] = self._standard_provider.get_scaled_standard(
+                digit_data=self._digit_standards_cache[0].get(digit_key),
                 vertical_scale=scale,
                 horizontal_scale=scale,
             )
 
-        digit_to_compare_key = str(digit_to_compare)
-        digit_to_compare_data = self._digit_standards[scale].get(digit_to_compare_key)
-
-        return np.array(digit_to_compare_data)
+        return scaled_standards
 
     @staticmethod
     def __validate_recognize_data(
@@ -201,7 +220,7 @@ class MonoDigitRecognizer(BaseRecognizer):
         :param value: `digit_standards_path` variable value
         """
         self._digit_standards_path = value
-        self._digit_standards = self._data_provider.get_digit_standards_dict()
+        self._digit_standards_cache = self._data_provider.get_digit_standards_dict()
 
     @property
     def data_provider(self):
@@ -220,7 +239,7 @@ class MonoDigitRecognizer(BaseRecognizer):
         :param value: `data_provider` variable value
         """
         self._data_provider = value(self._digit_standards_path)
-        self._digit_standards = self._data_provider.get_digit_standards_dict()
+        self._digit_standards_cache = self._data_provider.get_digit_standards_dict()
 
     def __repr__(self):
         """
@@ -228,12 +247,8 @@ class MonoDigitRecognizer(BaseRecognizer):
         """
         return (
             f"{self.__class__.__name__}("
-            f"{self._digit_standards!r}, "
+            f"{self._digit_standards_cache!r}, "
             f"{self._data_provider!r}, "
             f"{self._digit_standards_path!r}"
             f")"
         )
-
-
-if __name__ == '__main__':
-    m = MonoDigitRecognizer()
