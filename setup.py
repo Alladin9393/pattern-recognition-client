@@ -12,7 +12,7 @@ with open('requirements/production.txt') as f:
 setup(
     version='0.1.0',
     name='statprly',
-    description='Python package for recognizing patterns based on server data.',
+    description='Python package with recognition tools.',
     long_description=long_description,
     long_description_content_type='text/markdown',
     url='https://github.com/Alladin9393/statprly',
