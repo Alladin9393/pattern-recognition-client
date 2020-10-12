@@ -10,7 +10,7 @@ with open('requirements/production.txt') as f:
     requirements = f.read().splitlines()
 
 setup(
-    version='0.1.0',
+    version='0.1.1',
     name='statprly',
     description='Python package with recognition tools.',
     long_description=long_description,
