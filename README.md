@@ -79,6 +79,16 @@ if __name__ == '__main__':
     print(recognized_digit)    
 ```
 
+Recognize random digit with noise with data from `Pattern Recognition Server`:
+
+Install requirements to interact with server:
+```bash
+$ pip3 install websockets
+```
+
+Example code can be found here:
+[Link to github gist](https://gist.github.com/Alladin9393/52c22ac263684d878ce8819642a07f1a).
+
 ## Development
 
 Clone the project and move to project folder:
