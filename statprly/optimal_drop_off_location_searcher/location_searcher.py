@@ -1,9 +1,10 @@
 """
 Provide an implementation of the optimal drop-off location searcher.
 """
+from statprly.optimal_drop_off_location_searcher.interfaces import BaseOptimalDropOffLocationSearcher
 
 
-class OptimalDropOffLocationSearcher:
+class OptimalDropOffLocationSearcher(BaseOptimalDropOffLocationSearcher):
     """
     Implementation of the optimal drop-off location searcher.
     """
@@ -20,8 +21,8 @@ class OptimalDropOffLocationSearcher:
         """
         optimal_heat_condition = sum(heatmap) / 2
         optimal_heat = 0
-        for i in range(len(heatmap)):
+        for i, heat in enumerate(heatmap):
             if optimal_heat >= optimal_heat_condition:
                 return i - 1
 
-            optimal_heat += heatmap[i]
+            optimal_heat += heat
