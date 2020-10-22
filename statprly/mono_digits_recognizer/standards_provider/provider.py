@@ -3,7 +3,9 @@ Provide implementation of the digit standards provider.
 """
 import numpy as np
 
-from statprly.mono_digits_recognizer.standards_provider.interfaces import BaseStandardsProvider
+from statprly.mono_digits_recognizer.standards_provider.interfaces import (
+    BaseStandardsProvider,
+)
 
 
 class StandardsProvider(BaseStandardsProvider):
