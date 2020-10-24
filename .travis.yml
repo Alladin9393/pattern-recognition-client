@@ -10,6 +10,7 @@ script:
     - cat requirements/production.txt | safety check --stdin
     - flake8 statprly && flake8 tests
     - isort statprly tests --diff
+    - coverage run --include=statprly/* -m pytest -ra
 
 after_success:
   - coverage report -m && coverage xml
