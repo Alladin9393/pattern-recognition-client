@@ -3,8 +3,8 @@ Provide implementation of the `mnist` recognizer.
 """
 import numpy as np
 
-from statprly.mnist_digits_recognizer.interfaces import BaseRecognizer
 from statprly.constants import SUPPORTED_NUMBER_OF_MNIST_CLASSES
+from statprly.mnist_digits_recognizer.interfaces import BaseRecognizer
 
 
 class MNISTRecognizer(BaseRecognizer):

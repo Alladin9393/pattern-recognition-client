@@ -1,8 +1,6 @@
 """
 Provide tests for DataReader.
 """
-from os.path import dirname
-
 import pytest
 
 from statprly.mnist_digits_recognizer import MNISTProvider

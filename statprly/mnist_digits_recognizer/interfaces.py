@@ -1,7 +1,10 @@
 """
 Provide interfaces for `mnist` digits recognizer.
 """
-from abc import ABC, abstractmethod
+from abc import (
+    ABC,
+    abstractmethod,
+)
 
 import numpy as np
 
