@@ -3,3 +3,4 @@ include LICENSE
 include requirements.txt
 include requirements
 include statprly/mono_digits_recognizer/digit_standards/digits.json
+include statprly/mnist_digits_recognizer/mnist_data/mnist.pkl

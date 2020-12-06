@@ -1,0 +1,1 @@
+from statprly.mnist_digits_recognizer.mnist_provider import MNISTProvider
