@@ -1,7 +1,9 @@
 """
 Provide an implementation of the optimal drop-off location searcher.
 """
-from statprly.optimal_drop_off_location_searcher.interfaces import BaseOptimalDropOffLocationSearcher
+from statprly.optimal_drop_off_location_searcher.interfaces import (
+    BaseOptimalDropOffLocationSearcher,
+)
 
 
 class OptimalDropOffLocationSearcher(BaseOptimalDropOffLocationSearcher):
