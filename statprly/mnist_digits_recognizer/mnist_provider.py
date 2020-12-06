@@ -6,13 +6,15 @@ from typing import Tuple
 
 import numpy as np
 
+from statprly.constants import MNIST_DIGITS_DATA_PATH
+
 
 class MNISTProvider:
     """
     Implementation of the `mnist` provider.
     """
 
-    def __init__(self, mnist_data_path: str):
+    def __init__(self, mnist_data_path=MNIST_DIGITS_DATA_PATH):
         self.mnist_data_path = mnist_data_path
 
     @property
